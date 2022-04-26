@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "455df107a1a28e5bf46b",
+    "revision": "07f8fb7cffc1f281c895",
     "url": "/orangutan-gifs/static/css/main.d315d4c0.chunk.css"
   },
   {
-    "revision": "455df107a1a28e5bf46b",
-    "url": "/orangutan-gifs/static/js/main.455df107.chunk.js"
+    "revision": "07f8fb7cffc1f281c895",
+    "url": "/orangutan-gifs/static/js/main.07f8fb7c.chunk.js"
   },
   {
     "revision": "ad5c24c4990c28290b12",
@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/orangutan-gifs/static/media/twitter-logo.5c97ee2a.svg"
   },
   {
-    "revision": "d8a85c413b2676ada99cfdca4054862a",
+    "revision": "b1bd7e54fe9c91690e73fcd2b006e7b5",
     "url": "/orangutan-gifs/index.html"
   }
 ];
