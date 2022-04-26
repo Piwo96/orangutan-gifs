@@ -53,7 +53,7 @@
 }
 
 .connect-wallet-button {
-  background: -webkit-linear-gradient(left, #60c657, #35aee2);
+  background: -webkit-linear-gradient(left, rgb(12, 51, 178), #e235c8);
   background-size: 200% 200%;
   animation: gradient-animation 4s ease infinite;
 }
@@ -69,7 +69,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
+  /* position: absolute; */
   width: 100%;
   bottom: 0;
   left: 0;
@@ -89,10 +89,11 @@
 
 .gif-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); 
   grid-gap: 1.5rem;
   justify-items: center;
   margin: 0;
+  margin-bottom: 60px;
   padding: 0;
 }
 
@@ -109,6 +110,10 @@
   height: 300px;
   border-radius: 10px;
   object-fit: cover;
+}
+
+.gif-user-address {
+  color: white;
 }
 
 .connected-container input[type='text'] {
