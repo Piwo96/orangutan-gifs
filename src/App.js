@@ -44,6 +44,28 @@ const App = () => {
   const [inputValue, setInputValue] = useState('');
   const [gifList, setGifList] = useState([]);
 
+  // useEffects
+  /*
+   * When our component first mounts, let's check to see if we have a connected
+   * Phantom Wallet
+   */
+  // useEffect is a hook that allows aus to do something immediately after a state like the componet or 
+  // a field like the walletAdress in the second useEffect has rendered/changed
+  useEffect(() => {
+    const onLoad = async () => {
+      await checkIfWalletIsConnected();
+    };
+    window.addEventListener('load', onLoad);
+    return () => window.removeEventListener('load', onLoad);
+  }, []);
+
+  useEffect(() => {
+    if (walletAddress) {
+      console.log('Fetching GIF list...');
+      getGifList()
+    }
+  }, [walletAddress]);
+
   // Actions
   /*
    * This function holds the logic for deciding if a Phantom Wallet is
@@ -79,6 +101,14 @@ const App = () => {
     }
   };
 
+  const getProvider = () => {
+    const connection = new Connection(network, opts.preflightCommitment);
+    const provider = new Provider(
+      connection, window.solana, opts.preflightCommitment,
+    );
+    return provider;
+  }
+
   /*
    * Let's define this method so our code doesn't break.
    * We will write the logic for this next!
@@ -92,6 +122,21 @@ const App = () => {
       setWalletAddress(response.publicKey.toString());
     }
   };
+
+  const getGifList = async () => {
+    try {
+      const provider = getProvider();
+      const program = new Program(idl, programID, provider);
+      const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+
+      console.log("Got the account", account);
+      setGifList(account.gifList);
+
+    } catch (error) {
+      console.log("Error in getGifList: ", error);
+      setGifList(null);
+    }
+  }
 
   const sendGif = async () => {
     if (inputValue.length === 0) {
@@ -117,19 +162,6 @@ const App = () => {
       console.log("Error sending GIF:", error)
     }
   };
-
-  const onInputChange = (event) => {
-    const { value } = event.target;
-    setInputValue(value);
-  };
-
-  const getProvider = () => {
-    const connection = new Connection(network, opts.preflightCommitment);
-    const provider = new Provider(
-      connection, window.solana, opts.preflightCommitment,
-    );
-    return provider;
-  }
 
   const createGifAccount = async () => {
     try {
@@ -165,6 +197,17 @@ const App = () => {
     </button>
   );
 
+    // UI events
+    const onInputChange = (event) => {
+      const { value } = event.target;
+      setInputValue(value);
+    };
+  
+    const onInputSubmit = (event) => {
+      event.preventDefault();
+      sendGif();
+    }
+
   const renderConnectedContainer = () => {
     // If we hit this, it means the program account hasn't been initialized.
       if (gifList === null) {
@@ -181,10 +224,7 @@ const App = () => {
         return(
           <div className="connected-container">
             <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                sendGif();
-              }}
+              onSubmit={onInputSubmit}
             >
               <input
                 type="text"
@@ -212,7 +252,7 @@ const App = () => {
               {gifList.map((item, index) => (
                 <div className="gif-item" key={index}>
                   <img src={item.gifLink} />
-                  <a className="gif-user-address">User address: {item.userAddress.toString()}</a>
+                  <small className="gif-user-address">User address: {item.userAddress.toString()}</small>
                 </div>
               ))}
             </div>
@@ -220,40 +260,6 @@ const App = () => {
         )
       }
     };
-
-  /*
-   * When our component first mounts, let's check to see if we have a connected
-   * Phantom Wallet
-   */
-  useEffect(() => {
-    const onLoad = async () => {
-      await checkIfWalletIsConnected();
-    };
-    window.addEventListener('load', onLoad);
-    return () => window.removeEventListener('load', onLoad);
-  }, []);
-
-  const getGifList = async () => {
-    try {
-      const provider = getProvider();
-      const program = new Program(idl, programID, provider);
-      const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-
-      console.log("Got the account", account);
-      setGifList(account.gifList);
-
-    } catch (error) {
-      console.log("Error in getGifList: ", error);
-      setGifList(null);
-    }
-  }
-
-  useEffect(() => {
-    if (walletAddress) {
-      console.log('Fetching GIF list...');
-      getGifList()
-    }
-  }, [walletAddress]);
 
   return (
     <div className="App">
