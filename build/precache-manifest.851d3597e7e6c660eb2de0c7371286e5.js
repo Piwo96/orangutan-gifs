@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/orangutan-gifs/static/media/twitter-logo.5c97ee2a.svg"
   },
   {
-    "revision": "7d76f1463abc5dff943b7420eac906ac",
+    "revision": "807bcdf8be3d47c94810ee2fe00c8c5b",
     "url": "/orangutan-gifs/index.html"
   }
 ];
