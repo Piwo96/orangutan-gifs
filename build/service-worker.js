@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/orangutan-gifs/precache-manifest.08cf7fd371e89927a2baea0ab25257ac.js"
+  "/orangutan-gifs/precache-manifest.a85fcd02ae7048ce5ffdbf92d61700b9.js"
 );
 
 workbox.clientsClaim();
