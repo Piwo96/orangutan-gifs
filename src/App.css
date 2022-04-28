@@ -106,14 +106,37 @@
 }
 
 .gif-item img {
+  display: flex;
   width: 100%;
   height: 300px;
   border-radius: 10px;
   object-fit: cover;
+  margin-top: 5px;
 }
 
 .gif-user-address {
   color: white;
+}
+
+.gif-vote-container {
+  
+}
+
+.gif-upvote-button, .gif-downvote-button {
+  background: -webkit-linear-gradient(left, #4e44ce, #35aee2);
+  color: white;
+  border: 0;
+  width: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  background-size: 200% 200%;
+  animation: gradient-animation 4s ease infinite;
+  margin-right: 20px;
+  margin-top: 10px;
 }
 
 .connected-container input[type='text'] {

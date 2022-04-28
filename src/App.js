@@ -1,10 +1,65 @@
 import React, { useEffect, useState } from 'react';
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { Program, Provider, web3 } from '@project-serum/anchor';
 import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
 import idl from "./idl.json";
 import kp from './keypair.json';
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { Program, Provider, web3 } from '@project-serum/anchor';
+import GifItem from './components/GifItem.js';
+
+class GifItem extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {
+          userAdress: "",
+          gifLink: "",
+          upvoteCount: 0,
+          downvoteCount: 0,
+      };
+
+      // bindings are necessary to make `this` work in the callback
+      this.incrementUpvoteCount = this.incrementUpvoteCount.bind(this);
+      this.incrementDownvoteCount = this.incrementDownvoteCount.bind(this);
+  }
+
+  componentDidMount() {
+      this.setState({
+          userAddress: this.props.userAddress.toString(),
+          gifLink: this.props.gifLink.toString(),
+          upvoteCount: this.props.upvoteCount,
+          downvoteCount: this.props.downvoteCount,
+      });
+  }
+
+  incrementUpvoteCount() {
+      this.setState(prevState => ({
+          upvoteCount: prevState.upvoteCount += 1
+      }));
+      console.log("Upvote count incremented...");
+  }
+
+  incrementDownvoteCount() {
+      this.setState(prevState => ({
+          downvoteCount: prevState.downvoteCount += 1
+      }));
+      console.log("Downvote count incremented...");
+  }
+
+  render() {
+      return (
+          <div className="gif-item">
+              <div className="gif-item-content">
+                  <small className="gif-user-address">User address: {this.props.userAddress.toString()}</small>
+                  <img src={this.props.gifLink.toString()} />
+              </div>
+              <div className="gif-vote-container">
+                  <button className="gif-upvote-button" onClick={this.incrementUpvoteCount}>⬆ {this.state.upvoteCount}</button>
+                  <button className="gif-downvote-button" onClick={this.incrementDownvoteCount}>⬇ {this.state.downvoteCount}</button>
+              </div>
+          </div>
+      )
+  }
+}
 
 // Constants
 const TWITTER_HANDLE = 'nasty_piwo';
@@ -250,10 +305,22 @@ const App = () => {
               ))} */}
               {/* We use index as the key instead, also, the src is now item.gifLink */}
               {gifList.map((item, index) => (
-                <div className="gif-item" key={index}>
-                  <img src={item.gifLink} />
-                  <small className="gif-user-address">User address: {item.userAddress.toString()}</small>
-                </div>
+                <GifItem 
+                  key={index} 
+                  userAddress={item.userAddress} 
+                  gifLink={item.gifLink} 
+                  upvoteCount={0} 
+                  downvoteCount={0}/>
+                // <div className="gif-item" key={index}>
+                //   <div className="gif-item-content">
+                //     <small className="gif-user-address">User address: {item.userAddress.toString()}</small>
+                //     <img src={item.gifLink} />
+                //   </div>
+                //   <div className="gif-vote-container">
+                //     <button className="gif-upvote-button" onClick={incrementUpvote}>⬆ {index}</button>
+                //     <button className="gif-downvote-button" onClick={incrementDownvote}>⬇ {index}</button>
+                //   </div>
+                // </div>
               ))}
             </div>
           </div>
