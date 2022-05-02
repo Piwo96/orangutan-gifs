@@ -5,59 +5,146 @@ import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
 import idl from "./idl.json";
 import kp from './keypair.json';
-import GifItem from './components/GifItem.js';
+// import GifItem from './components/GifItem.js';
 
 class GifItem extends React.Component {
   constructor(props) {
       super(props);
+      this.walletAddress = props.walletAddress.toString();
       this.state = {
-          userAdress: "",
+          userAddress: "",
           gifLink: "",
-          upvoteCount: 0,
-          downvoteCount: 0,
+          voteCount: 0,
+          upvotedUsers: [],
+          downvotedUsers: [],
       };
+      this.upvotedUsers = new Array();
+      this.downvotedUsers = new Array();
+      this.userUpvoted = false;
+      this.userDownvoted = false;
 
       // bindings are necessary to make `this` work in the callback
-      this.incrementUpvoteCount = this.incrementUpvoteCount.bind(this);
-      this.incrementDownvoteCount = this.incrementDownvoteCount.bind(this);
+      this.incrementVoteCount = this.incrementVoteCount.bind(this);
+      this.decrementVoteCount = this.decrementVoteCount.bind(this);
   }
 
   componentDidMount() {
       this.setState({
           userAddress: this.props.userAddress.toString(),
           gifLink: this.props.gifLink.toString(),
-          upvoteCount: this.props.upvoteCount,
-          downvoteCount: this.props.downvoteCount,
+          voteCount: this.props.voteCount,
+          upvotedUsers: this.upvotedUsers,
+          downvotedUsers: this.downvotedUsers,
       });
   }
 
-  incrementUpvoteCount() {
-      this.setState(prevState => ({
-          upvoteCount: prevState.upvoteCount += 1
-      }));
-      console.log("Upvote count incremented...");
+  voteArrayContainsWalletAddress (voteArray, user) {
+    for( var i = 0; i < voteArray.length; i++) {
+      if (voteArray[i] === user){
+        return true;
+      }
+    }
+    return false
   }
 
-  incrementDownvoteCount() {
+  removeWalletAddressFromVoteArray (voteArray, user) {
+    for( var i = 0; i < voteArray.length; i++){
+      if (voteArray[i] === user){
+        voteArray.splice(i, 1);
+      }
+    }
+  }
+
+  setUserDidCountState () {
+    this.userUpvoted = this.voteArrayContainsWalletAddress(this.state.upvotedUsers, this.walletAddress);
+    this.userDownvoted = this.voteArrayContainsWalletAddress(this.state.downvotedUsers, this.walletAddress);
+  }
+
+  incrementVoteCount () {
+    const userAlreadyUpvoted = this.voteArrayContainsWalletAddress(this.state.upvotedUsers, this.walletAddress);
+    const userAlreadyDownvoted = this.voteArrayContainsWalletAddress(this.state.downvotedUsers, this.walletAddress);
+    
+    if (!userAlreadyUpvoted && !userAlreadyDownvoted) {
+      this.upvotedUsers.push(this.walletAddress);
       this.setState(prevState => ({
-          downvoteCount: prevState.downvoteCount += 1
+        voteCount: prevState.voteCount += 1,
+        upvotedUsers: this.upvotedUsers,
       }));
+      // TODO: add smart contract execution
+      console.log("Upvote count incremented...");
+    }
+    else if (!userAlreadyUpvoted && userAlreadyDownvoted) {
+      this.removeWalletAddressFromVoteArray(this.downvotedUsers, this.walletAddress);
+      this.setState(prevState => ({
+        voteCount: prevState.voteCount += 1,
+        downvotedUsers: this.downvotedUsers,
+      }));
+      console.log("Downvote removed...");
+    }
+    this.setUserDidCountState();
+  }
+
+  decrementVoteCount () {
+    const userAlreadyUpvoted = this.voteArrayContainsWalletAddress(this.state.upvotedUsers, this.walletAddress);
+    const userAlreadyDownvoted = this.voteArrayContainsWalletAddress(this.state.downvotedUsers, this.walletAddress);
+
+    if (!userAlreadyUpvoted && !userAlreadyDownvoted) {
+      this.downvotedUsers.push(this.walletAddress);
+      this.setState(prevState => ({
+        voteCount: prevState.voteCount -= 1,
+        downvotedUsers: this.downvotedUsers,
+      }));
+      // TODO: add smart contract execution
       console.log("Downvote count incremented...");
+    }
+    else if (userAlreadyUpvoted && !userAlreadyDownvoted) {
+      this.removeWalletAddressFromVoteArray(this.upvotedUsers, this.walletAddress);
+      this.setState(prevState => ({
+        voteCount: prevState.voteCount -= 1,
+        upvotedUsers: this.upvotedUsers,
+      }));
+      console.log("Upvote removed...");
+    }
+    this.setUserDidCountState();
+  }
+
+  deleteGif() {
+    
   }
 
   render() {
-      return (
-          <div className="gif-item">
-              <div className="gif-item-content">
-                  <small className="gif-user-address">User address: {this.props.userAddress.toString()}</small>
-                  <img src={this.props.gifLink.toString()} />
-              </div>
-              <div className="gif-vote-container">
-                  <button className="gif-upvote-button" onClick={this.incrementUpvoteCount}>⬆ {this.state.upvoteCount}</button>
-                  <button className="gif-downvote-button" onClick={this.incrementDownvoteCount}>⬇ {this.state.downvoteCount}</button>
-              </div>
+    const renderVoteCount = () => {
+      if(this.userUpvoted && !this.userDownvoted) {
+        return <p className="gif-upvote-count">{this.state.voteCount}</p>
+      } else if (this.userDownvoted && !this.userUpvoted) {
+        return <p className="gif-downvote-count">{this.state.voteCount}</p>
+      } else {
+        return <p className="gif-standard-count">{this.state.voteCount}</p>
+      }
+    }
+
+    const renderDeleteButton = () => {
+      if (this.props.userAddress.toString() == this.walletAddress) {
+        return <button className="delete-button" onClick={this.deleteGif}>X</button>
+      }
+    }
+
+    return (
+      <div className="gif-item">
+        <div className="gif-item-content">
+          <small className="gif-user-address">User address: {this.props.userAddress.toString()}</small>
+          <img src={this.props.gifLink.toString()} />
+        </div>
+        <div className="gif-side-container">
+          <div className="gif-vote-container">
+            <button className="gif-upvote-button" onClick={this.incrementVoteCount}>⬆</button>
+            {renderVoteCount()}
+            <button className="gif-downvote-button" onClick={this.decrementVoteCount}>⬇</button>
           </div>
-      )
+          {renderDeleteButton()}
+        </div>
+      </div>
+    )
   }
 }
 
@@ -184,7 +271,9 @@ const App = () => {
       const program = new Program(idl, programID, provider);
       const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
 
+      console.log(baseAccount.publicKey.toString());
       console.log("Got the account", account);
+      console.log(account.gifList);
       setGifList(account.gifList);
 
     } catch (error) {
@@ -264,6 +353,7 @@ const App = () => {
     }
 
   const renderConnectedContainer = () => {
+    const provider = getProvider();
     // If we hit this, it means the program account hasn't been initialized.
       if (gifList === null) {
         return (
@@ -305,12 +395,12 @@ const App = () => {
               ))} */}
               {/* We use index as the key instead, also, the src is now item.gifLink */}
               {gifList.map((item, index) => (
-                <GifItem 
+                <GifItem className="gif-item-container"
                   key={index} 
                   userAddress={item.userAddress} 
                   gifLink={item.gifLink} 
-                  upvoteCount={0} 
-                  downvoteCount={0}/>
+                  voteCount={0}
+                  walletAddress={provider.wallet.publicKey}/>
                 // <div className="gif-item" key={index}>
                 //   <div className="gif-item-content">
                 //     <small className="gif-user-address">User address: {item.userAddress.toString()}</small>
