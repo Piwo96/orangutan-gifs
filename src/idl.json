@@ -160,6 +160,10 @@
             "type": {
               "vec": "publicKey"
             }
+          },
+          {
+            "name": "voteCount",
+            "type": "i32"
           }
         ]
       }
