@@ -185,7 +185,31 @@ const App = () => {
         voteCount: prevState.voteCount -= 1,
         upvotedUsers: this.upvotedUsers,
       }));
+      this.removeUpvote();
       console.log("Upvote removed...");
+    }
+
+    removeUpvote = async () => {
+      try {
+        const provider = getProvider();
+        const program = new Program(idl, programID, provider);
+    
+        await program.rpc.cancleUpvoteGif(this.state.gifLink, {
+          accounts: {
+            baseAccount: baseAccount.publicKey,
+            user: provider.wallet.publicKey,
+          },
+        });
+        console.log("GIF successfully downvoted")
+        await getGifList();
+      } catch (error) {
+        console.log("Error downvoting GIF:", error)
+        this.removeWalletAddressFromVoteArray(this.upvotedUsers, this.walletAddress);
+        this.setState(prevState => ({
+          voteCount: prevState.voteCount += 1,
+          upvotedUsers: this.upvotedUsers,
+        }));
+      }
     }
     
     cancleDownvote() {
@@ -194,7 +218,31 @@ const App = () => {
         voteCount: prevState.voteCount += 1,
         downvotedUsers: this.downvotedUsers,
       }));
+      this.removeDownvote();
       console.log("Downvote removed...");
+    }
+
+    removeDownvote = async () => {
+      try {
+        const provider = getProvider();
+        const program = new Program(idl, programID, provider);
+    
+        await program.rpc.cancleDownvoteGif(this.state.gifLink, {
+          accounts: {
+            baseAccount: baseAccount.publicKey,
+            user: provider.wallet.publicKey,
+          },
+        });
+        console.log("GIF successfully downvoted")
+        await getGifList();
+      } catch (error) {
+        console.log("Error downvoting GIF:", error)
+        this.removeWalletAddressFromVoteArray(this.downvotedUsers, this.walletAddress);
+        this.setState(prevState => ({
+          voteCount: prevState.voteCount -= 1,
+          downvotedUsers: this.downvotedUsers,
+        }));
+      }
     }
   
     incrementVoteCount () {
@@ -233,6 +281,7 @@ const App = () => {
   
     render() {
       const renderVoteCount = () => {
+        this.setUserVotedState();
         if(this.userUpvoted && !this.userDownvoted) {
           return <p className="gif-upvote-count">{this.state.voteCount}</p>
         } else if (this.userDownvoted && !this.userUpvoted) {
